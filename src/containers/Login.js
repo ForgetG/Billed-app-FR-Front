@@ -25,14 +25,14 @@ export default class Login {
     }
     this.localStorage.setItem("user", JSON.stringify(user))
     this.login(user)
-      .catch(
-        (err) => this.createUser(user)
-      )
       .then(() => {
         this.onNavigate(ROUTES_PATH['Bills'])
         this.PREVIOUS_LOCATION = ROUTES_PATH['Bills']
         PREVIOUS_LOCATION = this.PREVIOUS_LOCATION
         this.document.body.style.backgroundColor="#fff"
+      })
+      .catch((err) => {
+        this.displayErrorMessage("User does not exist")
       })
 
   }
@@ -47,14 +47,14 @@ export default class Login {
     }
     this.localStorage.setItem("user", JSON.stringify(user))
     this.login(user)
-      .catch(
-        (err) => this.createUser(user)
-      )
       .then(() => {
         this.onNavigate(ROUTES_PATH['Dashboard'])
         this.PREVIOUS_LOCATION = ROUTES_PATH['Dashboard']
         PREVIOUS_LOCATION = this.PREVIOUS_LOCATION
         document.body.style.backgroundColor="#fff"
+      })
+      .catch((err) => {
+        this.displayErrorMessage("User does not exist")
       })
   }
 
@@ -91,5 +91,12 @@ export default class Login {
     } else {
       return null
     }
+  }
+  displayErrorMessage = (message) => {
+    const div = this.document.createElement('div')
+    div.innerHTML = message
+    div.style.color = 'red'
+    div.style.textAlign = 'center'
+    this.document.querySelector('body').appendChild(div)
   }
 }
