@@ -1,4 +1,3 @@
-
 import { ROUTES_PATH } from '../constants/routes.js'
 export let PREVIOUS_LOCATION = ''
 
@@ -14,7 +13,10 @@ export default class Login {
     formEmployee.addEventListener("submit", this.handleSubmitEmployee)
     const formAdmin = this.document.querySelector(`form[data-testid="form-admin"]`)
     formAdmin.addEventListener("submit", this.handleSubmitAdmin)
+    const registerButton = this.document.querySelector(`button[data-testid="register-button"]`)
+    registerButton.addEventListener("click", this.handleRegisterClick)
   }
+
   handleSubmitEmployee = e => {
     e.preventDefault()
     const user = {
@@ -34,7 +36,6 @@ export default class Login {
       .catch((err) => {
         this.displayErrorMessage("User does not exist")
       })
-
   }
 
   handleSubmitAdmin = e => {
@@ -56,6 +57,10 @@ export default class Login {
       .catch((err) => {
         this.displayErrorMessage("User does not exist")
       })
+  }
+
+  handleRegisterClick = () => {
+    this.onNavigate(ROUTES_PATH['Register'])
   }
 
   // not need to cover this function by tests
@@ -92,11 +97,25 @@ export default class Login {
       return null
     }
   }
+
   displayErrorMessage = (message) => {
+    // Remove any existing error message
+    const existingError = this.document.querySelector('.error-message')
+    if (existingError) {
+        existingError.remove()
+    }
+
+    // Create and display the new error message
     const div = this.document.createElement('div')
+    div.className = 'error-message'
     div.innerHTML = message
     div.style.color = 'red'
     div.style.textAlign = 'center'
+    div.style.border = '1px solid red'
+    div.style.backgroundColor = '#ffe6e6'
+    div.style.padding = '10px'
+    div.style.marginTop = '5px'
+    div.style.borderRadius = '5px'
     this.document.querySelector('body').appendChild(div)
   }
 }
