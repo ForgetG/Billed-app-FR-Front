@@ -69,7 +69,7 @@ export default class NewDED {
       status: 'pending'
     }
     this.updateDED(ded)
-    this.onNavigate(ROUTES_PATH['Bills'])
+    this.onNavigate(ROUTES_PATH['Deds'])
   }
 
   // not need to cover this function by tests
@@ -79,7 +79,7 @@ export default class NewDED {
       .deds()
       .update({data: JSON.stringify(ded), selector: this.dedId})
       .then(() => {
-        this.onNavigate(ROUTES_PATH['Bills'])
+        this.onNavigate(ROUTES_PATH['Deds'])
       })
       .catch(error => console.error(error))
     }

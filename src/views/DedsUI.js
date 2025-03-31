@@ -4,16 +4,16 @@ import LoadingPage from "./LoadingPage.js"
 
 import Actions from './Actions.js'
 
-const row = (bill) => {
+const row = (ded) => {
   return (`
     <tr>
-      <td>${bill.type}</td>
-      <td>${bill.name}</td>
-      <td>${bill.date}</td>
-      <td>${bill.amount} €</td>
-      <td>${bill.status}</td>
+      <td>${ded.type}</td>
+      <td>${ded.name}</td>
+      <td>${ded.date}</td>
+      <td>${ded.amount} €</td>
+      <td>${ded.status}</td>
       <td>
-        ${Actions(bill.fileUrl)}
+        ${Actions(ded.fileUrl)}
       </td>
     </tr>
     `)
@@ -25,10 +25,10 @@ const row = (bill) => {
     // Sort in ascending order (earliest to latest)
     const sortedData = [...data].sort((a, b) => new Date(a.date) - new Date(b.date));
   
-    return sortedData.map(bill => row(bill)).join("");
+    return sortedData.map(ded => row(ded)).join("");
   };
 
-export default ({ data: bills, loading, error }) => {
+export default ({ data: deds, loading, error }) => {
   
   const modal = () => (`
     <div class="modal fade" id="modaleFile" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
@@ -58,10 +58,8 @@ export default ({ data: bills, loading, error }) => {
       ${VerticalLayout(120)}
       <div class='content'>
         <div class='content-header'>
-          <div class='content-title'> Mes notes de frais </div>
-          <button type="button" data-testid='btn-new-bill' class="btn btn-primary">Nouvelle note de frais</button>
-          <button type="button" data-testid='btn-new-ded' class="btn btn-secondary">Faire une DED</button>
-          <button data-testid="btn-deds" class="btn btn-primary">Go to Deds</button>
+          <div class='content-title'>  Mes Demandes d'engagement de dépenses </div>
+          <button type="button" data-testid='btn-new-ded' class="btn btn-secondary">Nouvelle DED</button>
         </div>
         <div id="data-table">
         <table id="example" class="table table-striped" style="width:100%">
@@ -76,7 +74,7 @@ export default ({ data: bills, loading, error }) => {
               </tr>
           </thead>
           <tbody data-testid="tbody">
-            ${rows(bills)}
+            ${rows(deds)}
           </tbody>
           </table>
         </div>

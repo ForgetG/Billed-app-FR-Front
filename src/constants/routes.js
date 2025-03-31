@@ -1,5 +1,6 @@
 import LoginUI from "../views/LoginUI.js"
 import BillsUI from "../views/BillsUI.js"
+import DedsUI from "../views/DedsUI.js"
 import NewBillUI from "../views/NewBillUI.js"
 import DashboardUI from "../views/DashboardUI.js"
 import RegisterUI from "../views/RegisterUI.js"
@@ -8,6 +9,7 @@ import NewDEDUI from "../views/NewDEDUI.js"
 export const ROUTES_PATH = {
   Login: '/',
   Bills: '#employee/bills',
+  Deds: '#employee/deds',
   NewBill: '#employee/bill/new',
   NewDED: '#employee/ded/new',
   Dashboard: '#admin/dashboard',
@@ -26,6 +28,8 @@ export const ROUTES = ({ pathname, data, error, loading }) => {
       return DashboardUI({ data, error, loading })
     case ROUTES_PATH['Register']:
       return RegisterUI()
+    case ROUTES_PATH['Deds']:
+      return DedsUI({ data, error, loading })
     case ROUTES_PATH['NewDED']:
       return NewDEDUI()
     default:

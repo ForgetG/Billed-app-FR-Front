@@ -8,14 +8,8 @@ export default class {
     this.onNavigate = onNavigate
     this.store = store
 
-    const buttonNewBill = document.querySelector(`button[data-testid="btn-new-bill"]`)
-    if (buttonNewBill) buttonNewBill.addEventListener('click', this.handleClickNewBill)
-
     const buttonNewDED = document.querySelector(`button[data-testid="btn-new-ded"]`)
     if (buttonNewDED) buttonNewDED.addEventListener('click', this.handleClickNewDED)
-
-    const buttonDeds = document.querySelector(`button[data-testid="btn-deds"]`) // New button
-    if (buttonDeds) buttonDeds.addEventListener('click', this.handleClickDeds) // Add event listener
 
     const iconEye = document.querySelectorAll(`div[data-testid="icon-eye"]`)
     if (iconEye) iconEye.forEach(icon => {
@@ -25,16 +19,8 @@ export default class {
     new Logout({ document, localStorage, onNavigate })
   }
 
-  handleClickNewBill = () => {
-    this.onNavigate(ROUTES_PATH['NewBill'])
-  }
-
   handleClickNewDED = () => {
     this.onNavigate(ROUTES_PATH['NewDED'])
-  }
-
-  handleClickDeds = () => { // New handler for Deds button
-    this.onNavigate(ROUTES_PATH['Deds'])
   }
 
   handleClickIconEye = (icon) => {
@@ -44,13 +30,13 @@ export default class {
     $('#modaleFile').modal('show')
   }
 
-  getBills = () => {
+  getDeds = () => {
     if (this.store) {
       return this.store
-      .bills()
+      .deds()
       .list()
       .then(snapshot => {
-        const bills = snapshot
+        const deds = snapshot
           .map(doc => {
             try {
               return {
@@ -59,6 +45,8 @@ export default class {
                 status: formatStatus(doc.status)
               }
             } catch(e) {
+              // if for some reason, corrupted data was introduced, we manage here failing formatDate function
+              // log the error and return unformatted date in that case
               console.log(e,'for',doc)
               return {
                 ...doc,
@@ -67,8 +55,8 @@ export default class {
               }
             }
           })
-          console.log('length', bills.length)
-        return bills
+          console.log('length', deds.length)
+        return deds
       })
     }
   }
