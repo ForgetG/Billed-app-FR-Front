@@ -27,6 +27,28 @@ export const filteredBills = (data, status) => {
     }) : []
 }
 
+export const filteredDeds = (data, status) => {
+  return (data && data.length) ?
+    data.filter(ded => {
+      let selectCondition
+
+      // in jest environment
+      if (typeof jest !== 'undefined') {
+        selectCondition = (ded.status === status)
+      }
+      /* istanbul ignore next */
+      else {
+        // in prod environment
+        const userEmail = JSON.parse(localStorage.getItem("user")).email
+        selectCondition =
+          (ded.status === status) &&
+          ![...USERS_TEST, userEmail].includes(ded.email)
+      }
+
+      return selectCondition
+    }) : []
+}
+
 export const card = (bill) => {
   const firstAndLastNames = bill.email.split('@')[0]
   const firstName = firstAndLastNames.includes('.') ?
@@ -52,8 +74,37 @@ export const card = (bill) => {
   `)
 }
 
+export const dedcard = (ded) => {
+  const firstAndLastNames = ded.email.split('@')[0]
+  const firstName = firstAndLastNames.includes('.') ?
+    firstAndLastNames.split('.')[0] : ''
+  const lastName = firstAndLastNames.includes('.') ?
+  firstAndLastNames.split('.')[1] : firstAndLastNames
+
+  return (`
+    <div class='ded-card' id='open-ded${ded.id}' data-testid='open-ded${ded.id}'>
+      <div class='ded-card-name-container'>
+        <div class='ded-card-name'> ${firstName} ${lastName} </div>
+        <span class='ded-card-grey'> ... </span>
+      </div>
+      <div class='name-price-container'>
+        <span> ${ded.name} </span>
+        <span> ${ded.amount} € </span>
+      </div>
+      <div class='date-type-container'>
+        <span> ${formatDate(ded.date)} </span>
+        <span> ${ded.type} </span>
+      </div>
+    </div>
+  `)
+}
+
 export const cards = (bills) => {
   return bills && bills.length ? bills.map(bill => card(bill)).join("") : ""
+}
+
+export const dedcards = (deds) => {
+  return deds && deds.length ? deds.map(ded => card(ded)).join("") : ""
 }
 
 export const getStatus = (index) => {
@@ -68,15 +119,35 @@ export const getStatus = (index) => {
 }
 
 export default class {
-  constructor({ document, onNavigate, store, bills, localStorage }) {
-    this.document = document
-    this.onNavigate = onNavigate
-    this.store = store
-    this.selectedTickets = {} // Add this line to keep track of selected tickets for each list
-    $('#arrow-icon1').click((e) => this.handleShowTickets(e, bills, 1))
-    $('#arrow-icon2').click((e) => this.handleShowTickets(e, bills, 2))
-    $('#arrow-icon3').click((e) => this.handleShowTickets(e, bills, 3))
-    new Logout({ localStorage, onNavigate })
+  constructor({ document, onNavigate, store, bills, deds, localStorage }) {
+    this.document = document;
+    this.onNavigate = onNavigate;
+    this.store = store;
+
+    // Fetch deds if not provided
+    if (!deds && this.store) {
+      this.getDedsAllUsers().then(fetchedDeds => {
+        this.deds = fetchedDeds;
+      });
+    } else {
+      this.deds = deds;
+    }
+
+    this.selectedTickets = {
+      bills: { counter: 0, id: null },
+      deds: { counter: 0, id: null },
+    };
+
+    // Event listeners for bills and deds sections
+    $('#arrow-icon-bills-pending').click((e) => this.handleShowTickets(e, bills, 1, 'bills-pending'));
+    $('#arrow-icon-bills-accepted').click((e) => this.handleShowTickets(e, bills, 2, 'bills-accepted'));
+    $('#arrow-icon-bills-refused').click((e) => this.handleShowTickets(e, bills, 3, 'bills-refused'));
+
+    $('#arrow-icon-deds-pending').click((e) => this.handleShowTickets(e, this.deds, 1, 'deds-pending'));
+    $('#arrow-icon-deds-accepted').click((e) => this.handleShowTickets(e, this.deds, 2, 'deds-accepted'));
+    $('#arrow-icon-deds-refused').click((e) => this.handleShowTickets(e, this.deds, 3, 'deds-refused'));
+
+    new Logout({ localStorage, onNavigate });
   }
 
   handleClickIconEye = () => {
@@ -86,73 +157,90 @@ export default class {
     if (typeof $('#modaleFileAdmin1').modal === 'function') $('#modaleFileAdmin1').modal('show')
   }
 
-  handleEditTicket(e, bill, bills, index) {
-    if (!this.selectedTickets[index]) this.selectedTickets[index] = { counter: 0, id: null }
-    const selectedTicket = this.selectedTickets[index]
+  handleEditTicket(e, item, items, type) {
+    console.log('handleEditTicket triggered for:', item);
+    const formUI = DashboardFormUI(item, type);
+    console.log('DashboardFormUI output:', formUI);
+    $('.dashboard-right-container div').html(formUI);
+    $('.vertical-navbar').css({ height: '150vh' });
 
-    if (selectedTicket.id !== bill.id) selectedTicket.counter = 0
-    selectedTicket.id = bill.id
-
-    if (selectedTicket.counter % 2 === 0) {
-      bills.forEach(b => {
-        $(`#open-bill${b.id}`).css({ background: '#0D5AE5' })
-      })
-      $(`#open-bill${bill.id}`).css({ background: '#2A2B35' })
-      $('.dashboard-right-container div').html(DashboardFormUI(bill))
-      $('.vertical-navbar').css({ height: '150vh' })
-    } else {
-      $(`#open-bill${bill.id}`).css({ background: '#0D5AE5' })
-      $('.dashboard-right-container div').html(`
-        <div id="big-billed-icon" data-testid="big-billed-icon"> ${BigBilledIcon} </div>
-      `)
-      $('.vertical-navbar').css({ height: '120vh' })
-    }
-    selectedTicket.counter++
-    $('#icon-eye-d').click(this.handleClickIconEye)
-    $('#btn-accept-bill').click((e) => this.handleAcceptSubmit(e, bill))
-    $('#btn-refuse-bill').click((e) => this.handleRefuseSubmit(e, bill))
+    $('#icon-eye-d').click(this.handleClickIconEye);
+    $(`#btn-accept-${type}`).click((e) => this.handleAcceptSubmit(e, item, type));
+    $(`#btn-refuse-${type}`).click((e) => this.handleRefuseSubmit(e, item, type));
   }
 
-  handleAcceptSubmit = (e, bill) => {
-    const newBill = {
-      ...bill,
+  handleAcceptSubmit = (e, item, type) => {
+    const newItem = {
+      ...item,
       status: 'accepted',
       commentAdmin: $('#commentary2').val()
-    }
-    this.updateBill(newBill)
-    this.onNavigate(ROUTES_PATH['Dashboard'])
-  }
+    };
+    console.log(`Accepting ${type}:`, newItem);
 
-  handleRefuseSubmit = (e, bill) => {
-    const newBill = {
-      ...bill,
+    if (type === 'bills') {
+      this.updateBill(newItem);
+    } else if (type === 'deds') {
+      this.updateDed(newItem);
+    }
+
+    this.onNavigate(ROUTES_PATH['Dashboard']);
+  };
+
+  handleRefuseSubmit = (e, item, type) => {
+    const newItem = {
+      ...item,
       status: 'refused',
       commentAdmin: $('#commentary2').val()
+    };
+    console.log(`Refusing ${type}:`, newItem);
+
+    if (type === 'bills') {
+      this.updateBill(newItem);
+    } else if (type === 'deds') {
+      this.updateDed(newItem);
     }
-    this.updateBill(newBill)
-    this.onNavigate(ROUTES_PATH['Dashboard'])
-  }
 
-  handleShowTickets(e, bills, index) {
-    if (!this.selectedTickets[index]) this.selectedTickets[index] = { counter: 0, id: null }
-    const selectedTicket = this.selectedTickets[index]
+    this.onNavigate(ROUTES_PATH['Dashboard']);
+  };
 
-    if (selectedTicket.counter % 2 === 0) {
-      $(`#arrow-icon${index}`).css({ transform: 'rotate(0deg)' })
-      $(`#status-bills-container${index}`)
-        .html(cards(filteredBills(bills, getStatus(index))))
+  handleShowTickets(e, items, index, type) {
+    if (this.counter === undefined || this.index !== index) this.counter = 0;
+    if (this.index === undefined || this.index !== index) this.index = index;
+  
+    if (this.counter % 2 === 0) {
+      console.log(`Expanding ${type}`);
+      $(`#arrow-icon-${type}`).css({ transform: 'rotate(0deg)' });
+
+      // Render cards for bills or deds
+      const renderedCards = type.includes('bills')
+        ? cards(filteredBills(items, getStatus(index)))
+        : dedcards(filteredDeds(items, getStatus(index)));
+
+      $(`.status-${type.split('-')[0]}-container`).html(renderedCards);
+
+      // Use event delegation to handle clicks
+      $(`.status-${type.split('-')[0]}-container`).off('click', '.bill-card, .ded-card'); // Remove existing listeners
+      $(`.status-${type.split('-')[0]}-container`).on('click', '.bill-card, .ded-card', (event) => {
+        console.log('Delegated click handler triggered');
+        const cardId = $(event.currentTarget).attr('id');
+        console.log(`Card clicked: ${cardId}`);
+        const itemId = cardId.replace(/^open-(bill|ded)/, '');
+        console.log('Extracted itemId:', itemId);
+        const item = items.find(i => i.id === itemId || i.id === parseInt(itemId, 10)); // Handle string and number IDs
+        console.log('Item found:', item);
+        if (item) {
+          const formatedType = type.split('-')[0]; // Get the type (bills or deds)
+          this.handleEditTicket(event, item, items, formatedType);
+        }
+      });
+      console.log('Items array:', items);
+      this.counter++;
     } else {
-      $(`#arrow-icon${index}`).css({ transform: 'rotate(90deg)' })
-      $(`#status-bills-container${index}`)
-        .html("")
+      console.log(`Collapsing ${type}`);
+      $(`#arrow-icon-${type}`).css({ transform: 'rotate(90deg)' });
+      $(`.status-${type.split('-')[0]}-container`).html("");
+      this.counter++;
     }
-    selectedTicket.counter++
-
-    filteredBills(bills, getStatus(index)).forEach(bill => {
-      $(`#open-bill${bill.id}`).click((e) => this.handleEditTicket(e, bill, bills, index))
-    })
-
-    return bills
   }
 
   getBillsAllUsers = () => {
@@ -176,6 +264,26 @@ export default class {
     }
   }
 
+  getDedsAllUsers = () => {
+    if (this.store) {
+      return this.store
+        .deds()
+        .list()
+        .then(snapshot => {
+          const deds = snapshot.map(doc => ({
+            id: doc.id,
+            ...doc,
+            date: doc.date,
+            status: doc.status
+          }));
+          return deds;
+        })
+        .catch(error => {
+          throw error;
+        });
+    }
+  }
+
   // not need to cover this function by tests
   /* istanbul ignore next */
   updateBill = (bill) => {
@@ -185,6 +293,16 @@ export default class {
       .update({data: JSON.stringify(bill), selector: bill.id})
       .then(bill => bill)
       .catch(console.log)
+    }
+  }
+
+  updateDed = (ded) => {
+    if (this.store) {
+      return this.store
+        .deds()
+        .update({ data: JSON.stringify(ded), selector: ded.id })
+        .then(ded => ded)
+        .catch(console.log)
     }
   }
 }

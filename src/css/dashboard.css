@@ -1,8 +1,11 @@
+/* General Dashboard Layout */
 .dashboard-content {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column; /* Stack sections vertically */
+  gap: 20px; /* Add spacing between sections */
 }
 
+/* Right Container */
 .dashboard-right-container {
   position: absolute;
   left: 530px;
@@ -13,6 +16,9 @@
   padding: 23px;
   width: calc(100% - 550px);
   min-height: calc(100% - 92px);
+  display: block !important;
+  visibility: visible !important;
+  height: auto !important;
 }
 
 .dashboard-form-container h3 {
@@ -22,16 +28,18 @@
   line-height: 28px;
 }
 
+/* Bills Section */
 .bills-feed {
-  width: 390px;
-  position: absolute;
+  width: 100%; /* Take full width */
+  position: relative; /* Relative positioning for internal elements */
   left: 120px;
   top: 52px;
 }
 
 .status-bills-container {
   max-height: 70vh;
-  overflow-y: scroll;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  margin-top: 10px; /* Add spacing between header and content */
 }
 
 .status-bills-header {
@@ -94,7 +102,71 @@
   justify-content: space-between;
 }
 
-.centered-svg-container{
+/* Deds Section */
+.deds-feed {
+  width: 100%; /* Take full width */
+  position: relative; /* Relative positioning for internal elements */
+  left: 120px;
+  top: 50px; /* Adjusted to place below the bills section */
+}
+
+.status-deds-container {
+  max-height: 70vh;
+  overflow-y: auto; /* Allow scrolling if content exceeds height */
+  margin-top: 10px; /* Add spacing between header and content */
+}
+
+.status-deds-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.ded-card {
+  margin-top: 17px;
+  margin-bottom: 17px;
+  background: #E57373; /* Different color for deds */
+  border-radius: 8px;
+  padding: 17px;
+  color: #fff;
+  line-height: 25px;
+  letter-spacing: 0.2px;
+  cursor: pointer;
+}
+
+.ded-card-name-container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.ded-card-name {
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.ded-card-grey {
+  mix-blend-mode: normal;
+  opacity: 0.4;
+  cursor: pointer;
+}
+
+/* Arrow Icon */
+.arrow-icon {
+  transform: rotate(90deg);
+  cursor: pointer;
+  transition: transform 0.3s ease; /* Smooth rotation */
+}
+
+.arrow-icon[style*="rotate(0deg)"] {
+  transform: rotate(0deg); /* Arrow pointing down */
+}
+
+.arrow-icon[style*="rotate(90deg)"] {
+  transform: rotate(90deg); /* Arrow pointing right */
+}
+
+/* Centered SVG */
+.centered-svg-container {
   display: flex;
   justify-content: center;
   align-content: center;
@@ -108,12 +180,8 @@
 
 .dashboard-svg-container {
   position: absolute;
-  top: 40%; left: 50%;
-  transform: translate(-50%,-40%);
-}
-
-.arrow-icon {
-  transform: rotate(90deg);
-  cursor: pointer;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -40%);
 }
 

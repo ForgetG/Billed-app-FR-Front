@@ -21,32 +21,32 @@ export const modal = () => (`
   </div>
   `)
 
-export default (bill) => {
-
+export default (item, type) => {
+  console.log('Rendering DashboardFormUI with item:', item, 'and type:', type);
   return (`
     <div class="container dashboard-form" data-testid="dashboard-form">
       <div class="row">
         <div class="col-sm" id="dashboard-form-col1">
           <label for="expense-type" class="bold-label">Type de dépense</label>
-          <div class='input-field'> ${bill.type} </div>
+          <div class='input-field'> ${item.type} </div>
           <label for="expense-name" class="bold-label">Nom de la dépense</label>
-          <div class='input-field'> ${bill.name} </div>
+          <div class='input-field'> ${item.name} </div>
           <label for="datepicker" class="bold-label">Date</label>
           <div class='input-field input-flex'>
-            <span>${formatDate(bill.date)}</span>
+            <span>${formatDate(item.date)}</span>
             <span> ${calendarIcon} </span>
           </div>
         </div>
         <div class="col-sm" id="dashboard-form-col2">
           <label for="commentary" class="bold-label">Commentaire</label>
-          <div class='textarea-field' style="height: 300px;"> ${bill.commentary} </div>
+          <div class='textarea-field' style="height: 300px;"> ${item.commentary} </div>
         </div>
       </div>
       <div class="row">
         <div class="col-sm">
           <label for="amount" class="bold-label">Montant TTC </label>
           <div class='input-field input-flex'>
-            <span data-testid="amount-d">${bill.amount}</span>
+            <span data-testid="amount-d">${item.amount}</span>
             <span> ${euroIcon} </span>
           </div>
         </div>
@@ -54,11 +54,11 @@ export default (bill) => {
           <label for="vat" class="bold-label">TVA</label>
           <div id='vat-flex-container'>
             <div class='input-field input-flex vat-flex'>
-              <span>${bill.vat}</span>
+              <span>${item.vat}</span>
               <span> ${euroIcon} </span>
             </div>
             <div class='input-field input-flex vat-flex'>
-              <span>${bill.pct}</span>
+              <span>${item.pct}</span>
               <span> ${pctIcon} </span>
             </div>
           </div>
@@ -68,15 +68,15 @@ export default (bill) => {
         <div class="col-sm">
           <label for="file" class="bold-label">Justificatif</label>
             <div class='input-field input-flex file-flex'>
-            <span id="file-name-admin">${bill.fileName}</span>
+            <span id="file-name-admin">${item.fileName}</span>
             <div class='icons-container'>
-              <span id="icon-eye-d" data-testid="icon-eye-d" data-bill-url="${bill.fileUrl}"> ${eyeWhite} </span>
+              <span id="icon-eye-d" data-testid="icon-eye-d" data-bill-url="${item.fileUrl}"> ${eyeWhite} </span>
             </div>
           </div>
         </div>
       </div>
       <div class="row">
-       ${bill.status === 'pending' ? (`
+       ${item.status === 'pending' ? (`
         <div class="col-sm">
           <label for="commentary-admin" class="bold-label">Ajouter un commentaire</label>
           <textarea id="commentary2" class="form-control blue-border" data-testid="commentary2" rows="5"></textarea>
@@ -84,19 +84,19 @@ export default (bill) => {
        `) : (`
         <div class="col-sm">
           <label for="commentary-admin" class="bold-label">Votre commentaire</label>
-          <div class='input-field'> ${bill.commentAdmin} </div>
+          <div class='input-field'> ${item.commentAdmin} </div>
         </div>
        `)}
       </div>
       <div class="row">
-      ${bill.status === 'pending' ? (`
+      ${item.status === 'pending' ? (`
       <div class="col-sm buttons-flex" style="width: 300px;" >
-        <button type="submit" id='btn-refuse-bill' data-testid='btn-refuse-bill-d' class="btn btn-primary">Refuser</button>
-        <button type="submit" id='btn-accept-bill' data-testid='btn-accept-bill-d' class="btn btn-primary">Accepter</button>
+        <button type="submit" id='btn-refuse-${type}' data-testid='btn-refuse-${type}' class="btn btn-primary">Refuser</button>
+        <button type="submit" id='btn-accept-${type}' data-testid='btn-accept-${type}' class="btn btn-primary">Accepter</button>
       </div>
       `) : ''}
     </div>
     ${modal()}
     </div>
-  `)
-}
+  `);
+};
