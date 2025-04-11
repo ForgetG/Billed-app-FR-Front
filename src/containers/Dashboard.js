@@ -128,9 +128,19 @@ export default class {
     if (!deds && this.store) {
       this.getDedsAllUsers().then(fetchedDeds => {
         this.deds = fetchedDeds;
+
+        // Update counts after deds are fetched
+        $('#arrow-icon-deds-pending-len').text(filteredDeds(this.deds, "pending").length);
+        $('#arrow-icon-deds-accepted-len').text(filteredDeds(this.deds, "accepted").length);
+        $('#arrow-icon-deds-refused-len').text(filteredDeds(this.deds, "refused").length);
       });
     } else {
       this.deds = deds;
+
+      // Update counts if deds are already provided
+      $('#arrow-icon-deds-pending-len').text(filteredDeds(this.deds, "pending").length);
+      $('#arrow-icon-deds-accepted-len').text(filteredDeds(this.deds, "accepted").length);
+      $('#arrow-icon-deds-refused-len').text(filteredDeds(this.deds, "refused").length);
     }
 
     this.selectedTickets = {
@@ -139,6 +149,10 @@ export default class {
     };
 
     // Event listeners for bills and deds sections
+    $('#arrow-icon-bills-pending-len').text(filteredBills(bills, "pending").length);
+    $('#arrow-icon-bills-accepted-len').text(filteredBills(bills, "accepted").length);
+    $('#arrow-icon-bills-refused-len').text(filteredBills(bills, "refused").length);
+
     $('#arrow-icon-bills-pending').click((e) => this.handleShowTickets(e, bills, 1, 'bills-pending'));
     $('#arrow-icon-bills-accepted').click((e) => this.handleShowTickets(e, bills, 2, 'bills-accepted'));
     $('#arrow-icon-bills-refused').click((e) => this.handleShowTickets(e, bills, 3, 'bills-refused'));
@@ -183,6 +197,8 @@ export default class {
       this.updateDed(newItem);
     }
 
+    // TODO: make update list nd length of items
+
     this.onNavigate(ROUTES_PATH['Dashboard']);
   };
 
@@ -199,6 +215,8 @@ export default class {
     } else if (type === 'deds') {
       this.updateDed(newItem);
     }
+
+    // TODO: make update list nd length of items
 
     this.onNavigate(ROUTES_PATH['Dashboard']);
   };
